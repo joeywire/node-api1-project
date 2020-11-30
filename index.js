@@ -26,6 +26,13 @@ const User = {
         const newUser = { id: shortid.generate(), ...user};
         users.push(newUser); 
         return newUser;  
+    }, 
+    delete(id) { 
+        const user = users.find(u => u.id === id ); 
+        if (user) { 
+            users = users.filter(u => u.id !== id); 
+        }
+        return user; 
     }
 };
 
@@ -58,6 +65,20 @@ server.get('/api/users/:id', (req, res) => {
         res.status(400).json({ message: `user not found with id of ${id}` });
     }
 });
+
+server.delete('/api/users/:id', (req, res) => {
+    // 1. Gather needed info from the request object
+    const { id } = req.params; 
+    // 2. Interact with the DB
+    const deleted = User.delete(id); 
+    // 3. Send appropriate response to client
+    if (deleted) { 
+        res.status(200).json(deleted);
+    } else { 
+        res.status(400).json({ message: `user not found with id ${id}!` });
+    }
+});
+
 //catchall enpoint 
 server.use('*', (req, res) => {
     res.status(404).json({ message: 'not found' })
@@ -66,3 +87,10 @@ server.use('*', (req, res) => {
 server.listen(5000, () => {
     console.log('listening on port 5000');
 });
+
+/* 
+General steps for building an End Points:  
+    // 1. Gather needed info from the request object
+    // 2. Interact with the DB
+    // 3. Send appropriate response to client 
+*/
