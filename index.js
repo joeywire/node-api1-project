@@ -33,6 +33,18 @@ const User = {
             users = users.filter(u => u.id !== id); 
         }
         return user; 
+    }, 
+    update(id, changes) { 
+        const user = users.find(u => u.id === id ); 
+        if (!user) {
+            return null;
+        } else { 
+            const updatedUser = { id, ...changes}
+            users = users.map( u => {
+                if (u.id === id) return updatedUser; 
+                return u;
+            })
+        }
     }
 };
 
@@ -79,6 +91,19 @@ server.delete('/api/users/:id', (req, res) => {
     }
 });
 
+server.put('/api/users/:id', (req, res) => {
+    // 1. Gather needed info from the request object
+    const { id } = req.params;
+    const changes = req.body; 
+    // 2. Interact with the DB
+    const updatedUser = User.update(id, changes)
+    // 3. Send appropriate response to client 
+    if (updatedUser) { 
+        res.status(200).json(updatedUser); 
+    } else { 
+        res.status(404).json({ message: `PUT user not found with id ${id}!` });
+    }
+})
 //catchall enpoint 
 server.use('*', (req, res) => {
     res.status(404).json({ message: 'not found' })
